@@ -66,13 +66,13 @@ StatusCode MyAlg::execute() {
     if (!(evt->eventType(xAOD::EventInfo::IS_SIMULATION))){
     	if (!m_grlTool->passRunLB(*evt)){
 		ATH_MSG_INFO("Event did not pass GRL!");
-		return StatusCode::SUCCESS;
+	//	return StatusCode::SUCCESS;
     	}
 	if ((evt->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error ) ||
             (evt->errorState(xAOD::EventInfo::Tile) == xAOD::EventInfo::Error ) ||
             (evt->errorState(xAOD::EventInfo::SCT) == xAOD::EventInfo::Error ) ||
             (evt->eventFlags(xAOD::EventInfo::Core) & 0x40000 )) {
-		return StatusCode::SUCCESS;
+	//	return StatusCode::SUCCESS;
         }	
     }
 
