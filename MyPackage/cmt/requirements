@@ -1,0 +1,33 @@
+## automatically generated CMT requirements file
+package MyPackage
+author  Michael.Holzbock
+
+## for athena policies: this has to be the first use statement
+use AtlasPolicy 	AtlasPolicy-*
+
+## for gaudi tools, services and objects
+use GaudiInterface 	GaudiInterface-* 	External
+private
+use AthenaBaseComps AthenaBaseComps-* Control
+use JpsiUpsilonTools JpsiUpsilonTools-* PhysicsAnalysis
+use xAODTracking xAODTracking-* Event/xAOD
+use TrkVertexAnalysisUtils      TrkVertexAnalysisUtils-*      Tracking/TrkVertexFitter
+use xAODEventInfo xAODEventInfo-* Event/xAOD
+use GoodRunsLists GoodRunsLists-* DataQuality
+end_private
+
+## put here your package dependencies...
+
+##
+
+branches src src/components doc python share
+
+## default is to make component library. See: https://twiki.cern.ch/twiki/bin/view/Main/LearningAthena#Libraries_in_CMT for alternatives
+library MyPackage *.cxx components/*.cxx
+apply_pattern component_library
+
+apply_pattern declare_joboptions files="*.py"
+apply_pattern declare_python_modules files="*.py"
+
+
+
