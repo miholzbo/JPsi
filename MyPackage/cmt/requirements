@@ -14,6 +14,7 @@ use xAODTracking xAODTracking-* Event/xAOD
 use TrkVertexAnalysisUtils      TrkVertexAnalysisUtils-*      Tracking/TrkVertexFitter
 use xAODEventInfo xAODEventInfo-* Event/xAOD
 use GoodRunsLists GoodRunsLists-* DataQuality
+use AtlasROOT AtlasROOT-* External
 end_private
 
 ## put here your package dependencies...

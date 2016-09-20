@@ -65,15 +65,13 @@ ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFind
 ToolSvc += ExampleJpsiFinder
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_13TeV.periodAllYear_DetStatus-v80-pro20-08_DQDefects-00-02-02_PHYS_StandardGRL_All_Good_25ns_TriggerMenu1e34only.xml"])
 
+svcMgr += CfgMgr.THistSvc()
+svcMgr.THistSvc.Output += ["JPsiOutput DATAFILE='JPsiOutput.root' OPT='RECREATE'"]
+
 algSeq = CfgMgr.AthSequencer("AthAlgSeq")
 algSeq += CfgMgr.MyAlg()
 algSeq.MyAlg.JpsiFinder = ToolSvc.JpsiFinderName
 algSeq.MyAlg.GRLTool = ToolSvc.GRLTool
-# rec.UserAlgs.set_Value_and_Lock("RunJpsiExample.py")
-from JpsiUpsilonTools.JpsiUpsilonToolsConf import JpsiExample
-# JpsiExample retrieves original and fitted vertices and saves some variables to a file
-algSeq += JpsiExample(outputNTupleName = "JpsiExample.root",
-                      JpsiCandidates   = "JpsiCandidates")
 
 # No stats printout
 from GaudiCommonSvc.GaudiCommonSvcConf import ChronoStatSvc
