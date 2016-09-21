@@ -76,9 +76,11 @@ private:
     std::vector<double> * m_trkRefitPx1;
     std::vector<double> * m_trkRefitPy1;
     std::vector<double> * m_trkRefitPz1;
+    std::vector<double> * m_trkRefitPt1;
     std::vector<double> * m_trkRefitPx2;
     std::vector<double> * m_trkRefitPy2;
     std::vector<double> * m_trkRefitPz2;
+    std::vector<double> * m_trkRefitPt2;
 
     std::vector<double> * m_vx;
     std::vector<double> * m_vy;
@@ -88,10 +90,12 @@ private:
     std::vector<double> * m_trkOrigPx1;
     std::vector<double> * m_trkOrigPy1;
     std::vector<double> * m_trkOrigPz1;
+    std::vector<double> * m_trkOrigPt1;
     std::vector<double> * m_trkOrigCharge2;
     std::vector<double> * m_trkOrigPx2;
     std::vector<double> * m_trkOrigPy2;
     std::vector<double> * m_trkOrigPz2;
+    std::vector<double> * m_trkOrigPt2;
 };
 
 #endif //> !MYPACKAGE_MYALG_H

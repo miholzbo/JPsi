@@ -43,8 +43,8 @@ include( "JpsiUpsilonTools/configureServices.py" )
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiFinder
 ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFinderName",
                                          OutputLevel                 = INFO,
-                                         muAndMu                     = True,
-                                         muAndTrack                  = False,
+                                         muAndMu                     = False,
+                                         muAndTrack                  = True,
                                          TrackAndTrack               = False,
                                          assumeDiMuons               = True,    # If true, will assume dimu hypothesis and use PDG value for mu mass
                                          invMassUpper                = 100000.0,
@@ -73,6 +73,8 @@ algSeq += CfgMgr.MyAlg()
 algSeq.MyAlg.JpsiFinder = ToolSvc.JpsiFinderName
 algSeq.MyAlg.GRLTool = ToolSvc.GRLTool
 
+algSeq.MyAlg.OutputLevel=DEBUG
+
 # No stats printout
 from GaudiCommonSvc.GaudiCommonSvcConf import ChronoStatSvc
 chronoStatSvc = ChronoStatSvc()
@@ -80,7 +82,7 @@ chronoStatSvc.ChronoPrintOutTable = FALSE
 chronoStatSvc.PrintUserTime       = FALSE
 chronoStatSvc.StatPrintOutTable   = FALSE
 
-theApp.EvtMax = 1000 # number of event to process
+theApp.EvtMax = 100 # number of event to process
 
 # Stops writing of monitoring ntuples (big files)
 from PerfMonComps.PerfMonFlags import jobproperties as jp

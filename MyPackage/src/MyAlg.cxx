@@ -103,10 +103,12 @@ StatusCode MyAlg::execute() {
     xAOD::VertexAuxContainer* jpsiAuxContainer = NULL;
 
     // call Jpsi finder
+    ATH_MSG_DEBUG("Calling JpsiFinder ...");
     if( !m_jpsiFinder->performSearch(jpsiContainer, jpsiAuxContainer).isSuccess() ) {
         ATH_MSG_FATAL("Jpsi finder (" << m_jpsiFinder << ") failed.");
         return StatusCode::FAILURE;
     }
+    ATH_MSG_DEBUG("Successfully called JpsiFinder!");
 
     // Extracting information from the Jpsi candidates
     jpsiCntr += jpsiContainer->size(); // Count the Jpsis
@@ -122,11 +124,13 @@ StatusCode MyAlg::execute() {
         m_trkRefitPx1->push_back(refTrk1.Px());
         m_trkRefitPy1->push_back(refTrk1.Py());
         m_trkRefitPz1->push_back(refTrk1.Pz());
+        m_trkRefitPt1->push_back(refTrk1.Pt());
 
         TLorentzVector refTrk2 = track4Momentum(jpsiCandidate, 1, m_muonMass);
         m_trkRefitPx2->push_back(refTrk2.Px());
         m_trkRefitPy2->push_back(refTrk2.Py());
         m_trkRefitPz2->push_back(refTrk2.Pz());
+        m_trkRefitPt2->push_back(refTrk2.Pt());
 
         //vertex position
         m_vx->push_back(jpsiCandidate->x());
@@ -138,12 +142,14 @@ StatusCode MyAlg::execute() {
         m_trkOrigPx1->push_back(origTrk1.Px());
         m_trkOrigPy1->push_back(origTrk1.Py());
         m_trkOrigPz1->push_back(origTrk1.Pz());
+        m_trkOrigPt1->push_back(origTrk1.Pt());
 
         TLorentzVector origTrk2 = origTrack4Momentum(jpsiCandidate, 1, m_muonMass);
         m_trkOrigCharge2->push_back(trackCharge(jpsiCandidate, 1));
         m_trkOrigPx2->push_back(origTrk2.Px());
         m_trkOrigPy2->push_back(origTrk2.Py());
         m_trkOrigPz2->push_back(origTrk2.Pz());
+        m_trkOrigPt2->push_back(origTrk2.Pt());
 
         // Calculate the invariant masses and their errors
         double orig_mass = (origTrk1+origTrk2).M();                      // mass from original tracks
@@ -231,9 +237,11 @@ void MyAlg::addBranches() {
     tree->Branch("trkRefitPx1",  &m_trkRefitPx1);
     tree->Branch("trkRefitPy1", &m_trkRefitPy1);
     tree->Branch("trkRefitPz1", &m_trkRefitPz1);
+    tree->Branch("trkRefitPt1", &m_trkRefitPt1);
     tree->Branch("trkRefitPx2",  &m_trkRefitPx2);
     tree->Branch("trkRefitPy2", &m_trkRefitPy2);
     tree->Branch("trkRefitPz2", &m_trkRefitPz2);
+    tree->Branch("trkRefitPt2", &m_trkRefitPt2);
 
     tree->Branch("vx",m_vx);
     tree->Branch("vy",m_vy);
@@ -243,10 +251,12 @@ void MyAlg::addBranches() {
     tree->Branch("trkOrigPx1",  &m_trkOrigPx1);
     tree->Branch("trkOrigPy1", &m_trkOrigPy1);
     tree->Branch("trkOrigPz1", &m_trkOrigPz1);
+    tree->Branch("trkOrigPt1", &m_trkOrigPt1);
     tree->Branch("trkOrigCharge2",  &m_trkOrigCharge2);
     tree->Branch("trkOrigPx2",  &m_trkOrigPx2);
     tree->Branch("trkOrigPy2", &m_trkOrigPy2);
     tree->Branch("trkOrigPz2", &m_trkOrigPz2);
+    tree->Branch("trkOrigPt2", &m_trkOrigPt2);
 }
 
 void MyAlg::initializeBranches() {
@@ -262,9 +272,11 @@ void MyAlg::initializeBranches() {
     m_trkRefitPx1 = new std::vector<double>;
     m_trkRefitPy1 = new std::vector<double>;
     m_trkRefitPz1 = new std::vector<double>;
+    m_trkRefitPt1 = new std::vector<double>;
     m_trkRefitPx2 = new std::vector<double>;
     m_trkRefitPy2 = new std::vector<double>;
     m_trkRefitPz2 = new std::vector<double>;
+    m_trkRefitPt2 = new std::vector<double>;
 
     m_vx = new std::vector<double>;
     m_vy = new std::vector<double>;
@@ -274,10 +286,12 @@ void MyAlg::initializeBranches() {
     m_trkOrigPx1 = new std::vector<double>;
     m_trkOrigPy1 = new std::vector<double>;
     m_trkOrigPz1 = new std::vector<double>;
+    m_trkOrigPt1 = new std::vector<double>;
     m_trkOrigCharge2 = new std::vector<double>;
     m_trkOrigPx2 = new std::vector<double>;
     m_trkOrigPy2 = new std::vector<double>;
     m_trkOrigPz2 = new std::vector<double>;
+    m_trkOrigPt2 = new std::vector<double>;
 
 
 }
@@ -295,9 +309,12 @@ void MyAlg::clearBranches() {
     m_trkRefitPx1->clear();
     m_trkRefitPy1->clear();
     m_trkRefitPz1->clear();
+    m_trkRefitPt1->clear();
     m_trkRefitPx2->clear();
     m_trkRefitPy2->clear();
     m_trkRefitPz2->clear();
+    m_trkRefitPt2->clear();
+
 
     m_vx->clear();
     m_vy->clear();
@@ -307,10 +324,13 @@ void MyAlg::clearBranches() {
     m_trkOrigPx1->clear();
     m_trkOrigPy1->clear();
     m_trkOrigPz1->clear();
+    m_trkOrigPt1->clear();
     m_trkOrigCharge2->clear();
     m_trkOrigPx2->clear();
     m_trkOrigPy2->clear();
     m_trkOrigPz2->clear();
+    m_trkOrigPt2->clear();
+
 }
 
 // ---------------------------------------------------------------------------------
