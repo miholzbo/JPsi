@@ -43,15 +43,15 @@ include( "JpsiUpsilonTools/configureServices.py" )
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiFinder
 ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFinderName",
                                          OutputLevel                 = INFO,
-                                         muAndMu                     = False,
-                                         muAndTrack                  = True,
-                                         TrackAndTrack               = False,
+                                         muAndMu                     = False,  # original: True
+                                         muAndTrack                  = True,   # original: False
+                                         TrackAndTrack               = False,  # original: False
                                          assumeDiMuons               = True,    # If true, will assume dimu hypothesis and use PDG value for mu mass
-                                         invMassUpper                = 100000.0,
-                                         invMassLower                = 0.0,
+                                         invMassUpper                = 3500.0, # original: 100000.0
+                                         invMassLower                = 2700.0, # original: 0.0
                                          Chi2Cut                     = 200.,
                                          oppChargesOnly              = True,
-                                         atLeastOneComb              = True,
+                                         atLeastOneComb              = False,  # original: True
                                          useCombinedMeasurement      = False, # Only takes effect if combOnly=True
                                          muonCollectionKey           = "Muons",
                                          TrackParticleCollection     = "InDetTrackParticles",
@@ -61,7 +61,9 @@ ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFind
                                          TrackSelectorTool           = InDetTrackSelectorTool,
                                          ConversionFinderHelperTool  = InDetConversionHelper,
                                          VertexPointEstimator        = VtxPointEstimator,
-                                         useMCPCuts                  = False)
+                                         useMCPCuts                  = False,
+                                         doTagAndProbe               = True, # original: False
+                                         trackThresholdPt            = 2000.0) # original: 0.0
 ToolSvc += ExampleJpsiFinder
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_13TeV.periodAllYear_DetStatus-v80-pro20-08_DQDefects-00-02-02_PHYS_StandardGRL_All_Good_25ns_TriggerMenu1e34only.xml"])
 
@@ -74,6 +76,7 @@ algSeq.MyAlg.JpsiFinder = ToolSvc.JpsiFinderName
 algSeq.MyAlg.GRLTool = ToolSvc.GRLTool
 
 algSeq.MyAlg.OutputLevel=DEBUG
+ExampleJpsiFinder.OutputLevel=DEBUG
 
 # No stats printout
 from GaudiCommonSvc.GaudiCommonSvcConf import ChronoStatSvc
@@ -82,7 +85,7 @@ chronoStatSvc.ChronoPrintOutTable = FALSE
 chronoStatSvc.PrintUserTime       = FALSE
 chronoStatSvc.StatPrintOutTable   = FALSE
 
-theApp.EvtMax = 100 # number of event to process
+theApp.EvtMax = -1 # number of event to process
 
 # Stops writing of monitoring ntuples (big files)
 from PerfMonComps.PerfMonFlags import jobproperties as jp
