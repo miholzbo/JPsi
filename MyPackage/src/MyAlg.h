@@ -7,6 +7,7 @@
 #include "JpsiUpsilonTools/JpsiFinder.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "GoodRunsLists/GoodRunsListSelectionTool.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -41,7 +42,8 @@ private:
     ToolHandle<Analysis::JpsiFinder>            m_jpsiFinder;
     ToolHandle<Trk::V0Tools>                    m_v0Tools;
     ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
-    ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
+    ToolHandle<IGoodRunsListSelectionTool>      m_grlTool;
+    ToolHandle<Trig::TrigDecisionTool>          m_tdt;
 
 
     void addBranches(void);

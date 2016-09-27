@@ -7,6 +7,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
+#include "xAODMuon/MuonContainer.h"
 
 #include <stdio.h>
 
@@ -16,7 +17,8 @@ MyAlg::MyAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthAlgorithm(n
                                                                   m_jpsiFinder("JpsiFinder/Whatever"),
                                                                   m_v0Tools("Trk::V0Tools"),
                                                                   m_pvRefitter("Analysis::PrimaryVertexRefitter"),
-                                                                  m_grlTool("GoodRunsListSelectionTool/Whatever")
+                                                                  m_grlTool("GoodRunsListSelectionTool/Whatever"),
+                                                                  m_tdt("Trig::TrigDecisionTool/TrigDecisionTool")
 
 {
     declareProperty("JpsiFinder", m_jpsiFinder, "The private JpsiFinder tool");
@@ -33,10 +35,11 @@ MyAlg::~MyAlg() {}
 
 StatusCode MyAlg::initialize() {
     ATH_MSG_INFO("Initializing " << name() << "...");
-    CHECK(m_jpsiFinder.retrieve());
+    CHECK( m_jpsiFinder.retrieve());
     CHECK( m_v0Tools.retrieve());
     CHECK( m_pvRefitter.retrieve());
     CHECK( m_grlTool.retrieve());
+    CHECK( m_tdt.retrieve());
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
     CHECK( histSvc.retrieve() );
@@ -67,6 +70,15 @@ StatusCode MyAlg::finalize() {
 
 StatusCode MyAlg::execute() {
     ATH_MSG_DEBUG("Executing " << name() << "...");
+
+    // Crosscheck
+//    const xAOD::MuonContainer* muons = 0;
+//    CHECK( evtStore()->retrieve(muons,"Muons") );
+//    ATH_MSG_INFO("Number of Muons" << muons->size());
+//    for (const auto& muon : *muons){
+//        if (!muon->inDetTrackParticleLink().isValid()) continue;
+//        ATH_MSG_INFO("Muon pT:" << muon->pt() << "   " << "Associated Trk pT: " << muon->inDetTrackParticleLink().cachedElement()->pt());
+//    }
 
     // Increment counter
     ++eventCntr;

@@ -7,10 +7,15 @@ athenaCommonFlags.FilesInput = ["/project/etp5/miholzbo/data16/data16_13TeV.0030
 # athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
 
 from RecExConfig.RecFlags import rec
-
-rec.doTrigger.set_Value_and_Lock(False) # leave false; nothing to do with trigger analysis
-
-
+from RecExConfig.RecAlgsFlags import recAlgs
+# rec.doTrigger.set_Value_and_Lock(False) # leave false; nothing to do with trigger analysis
+# switch off detectors
+rec.doForwardDet=False
+rec.doInDet=False
+rec.doCalo=False
+rec.doMuon=False
+rec.doEgamma=False
+rec.doTrigger = True; recAlgs.doTrigger=False # disable trigger (maybe necessary if detectors switched off)
 
 # Output log setting; this is for the framework in general
 # You may over-ride this in your job options for your algorithm
@@ -61,9 +66,9 @@ ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFind
                                          TrackSelectorTool           = InDetTrackSelectorTool,
                                          ConversionFinderHelperTool  = InDetConversionHelper,
                                          VertexPointEstimator        = VtxPointEstimator,
-                                         useMCPCuts                  = False,
+                                         useMCPCuts                  = False, # original: False
                                          doTagAndProbe               = True, # original: False
-                                         trackThresholdPt            = 2000.0) # original: 0.0
+                                         trackThresholdPt            = 0.0) # original: 0.0
 ToolSvc += ExampleJpsiFinder
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_13TeV.periodAllYear_DetStatus-v80-pro20-08_DQDefects-00-02-02_PHYS_StandardGRL_All_Good_25ns_TriggerMenu1e34only.xml"])
 
@@ -75,7 +80,18 @@ algSeq += CfgMgr.MyAlg()
 algSeq.MyAlg.JpsiFinder = ToolSvc.JpsiFinderName
 algSeq.MyAlg.GRLTool = ToolSvc.GRLTool
 
-algSeq.MyAlg.OutputLevel=DEBUG
+
+from TriggerJobOpts.TriggerFlags import TriggerFlags
+TriggerFlags.configurationSourceList.set_Value_and_Lock( [ "ds" ] )
+
+from TriggerJobOpts.TriggerConfigGetter import TriggerConfigGetter
+TriggerConfigGetter()
+
+
+# ToolSvc.TrigDecisionTool.TrigDecisionKey='xTrigDecision'
+ToolSvc += CfgMgr.Trig__MatchingTool("TriggerMatchingTool",OutputLevel=DEBUG)
+
+# algSeq.MyAlg.OutputLevel=DEBUG
 ExampleJpsiFinder.OutputLevel=DEBUG
 
 # No stats printout
@@ -85,12 +101,16 @@ chronoStatSvc.ChronoPrintOutTable = FALSE
 chronoStatSvc.PrintUserTime       = FALSE
 chronoStatSvc.StatPrintOutTable   = FALSE
 
-theApp.EvtMax = -1 # number of event to process
+theApp.EvtMax = 1000 # number of event to process
 
 # Stops writing of monitoring ntuples (big files)
 from PerfMonComps.PerfMonFlags import jobproperties as jp
 jp.PerfMonFlags.doMonitoring = False
 jp.PerfMonFlags.doFastMon = False
+
+
+#Optional include to suppress as much athena output as possible. Keep at bottom of joboptions so that it doesn't suppress the logging of the things you have configured above
+include("AthAnalysisBaseComps/SuppressLogging.py")
 
 ###
 
