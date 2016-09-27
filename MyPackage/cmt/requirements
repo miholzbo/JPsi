@@ -11,9 +11,11 @@ private
 use AthenaBaseComps AthenaBaseComps-* Control
 use JpsiUpsilonTools JpsiUpsilonTools-* PhysicsAnalysis
 use xAODTracking xAODTracking-* Event/xAOD
+use xAODMuon                    xAODMuon-*                    Event/xAOD
 use TrkVertexAnalysisUtils      TrkVertexAnalysisUtils-*      Tracking/TrkVertexFitter
 use xAODEventInfo xAODEventInfo-* Event/xAOD
 use GoodRunsLists GoodRunsLists-* DataQuality
+use TrigDecisionTool TrigDecisionTool-* Trigger/TrigAnalysis
 use AtlasROOT AtlasROOT-* External
 end_private
 

@@ -89,7 +89,7 @@ TriggerConfigGetter()
 
 
 # ToolSvc.TrigDecisionTool.TrigDecisionKey='xTrigDecision'
-ToolSvc += CfgMgr.Trig__MatchingTool("TriggerMatchingTool",OutputLevel=DEBUG)
+ToolSvc += CfgMgr.Trig__MatchingTool("TriggerMatchingTool",OutputLevel=INFO)
 
 # algSeq.MyAlg.OutputLevel=DEBUG
 ExampleJpsiFinder.OutputLevel=DEBUG
