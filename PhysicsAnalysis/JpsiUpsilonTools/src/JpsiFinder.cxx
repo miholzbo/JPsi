@@ -378,8 +378,10 @@ namespace Analysis {
             std::vector<int> listToDelete;
             std::vector<int>::reverse_iterator ii;
             for (jpsiItr = jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr,++index) {
-                if ( (*jpsiItr).muon1->pt() < 4000 || fabs((*jpsiItr).muon1->eta()) > 2.7 || ( fabs((*jpsiItr).trackParticle1->z0() - (*jpsiItr).trackParticle2->z0()) > 5 ) )
+                if ( !((*jpsiItr).muon1->muonType() == xAOD::Muon::Combined) || (*jpsiItr).muon1->pt() < 4000 || fabs((*jpsiItr).muon1->eta()) > 2.7 || 
+                   ( fabs((*jpsiItr).trackParticle1->z0() - (*jpsiItr).trackParticle2->z0()) > 5 ) ){
                     listToDelete.push_back(index);
+                }
             }
             for (ii=listToDelete.rbegin(); ii!=listToDelete.rend(); ++ii) {
                 jpsiCandidates.erase(jpsiCandidates.begin() + (*ii) );
