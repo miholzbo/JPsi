@@ -1,11 +1,11 @@
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 
 # InputFiles for local use
-# athenaCommonFlags.FilesInput = [ "/project/etp5/miholzbo/mc15/mc15_13TeV.424100.Pythia8B_A14_CTEQ6L1_Jpsimu4mu4.merge.AOD.e3735_s2608_s2183_r7772_r7676/AOD.08439866._000181.pool.root.1"]
+athenaCommonFlags.FilesInput = [ "/project/etp5/miholzbo/mc15/mc15_13TeV.424100.Pythia8B_A14_CTEQ6L1_Jpsimu4mu4.merge.AOD.e3735_s2608_s2183_r7772_r7676/AOD.08439866._000181.pool.root.1"]
 # athenaCommonFlags.FilesInput = ["/project/etp5/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
 # InputFiles for use on lxplus
 # athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
-athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/mc15/AOD.08439866._000181.pool.root.1"]
+# athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/mc15/AOD.08439866._000181.pool.root.1"]
 
 from RecExConfig.RecFlags import rec
 from RecExConfig.RecAlgsFlags import recAlgs
@@ -75,6 +75,8 @@ ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_1
 
 svcMgr += CfgMgr.THistSvc()
 svcMgr.THistSvc.Output += ["JPsiOutput DATAFILE='JPsiOutput.root' OPT='RECREATE'"]
+
+algseq += CfgMgr.CP__CalibratedMuonsProvider(Input="Muons",Output="CalibratedMuons")
 
 algSeq = CfgMgr.AthSequencer("AthAlgSeq")
 algSeq += CfgMgr.MyAlg()

@@ -372,7 +372,7 @@ namespace Analysis {
             ATH_MSG_DEBUG("Number of candidates after Trigger Decision & Matching: " << jpsiCandidates.size());
         }
 
-        // (0.1) Cuts on Tag Muon
+        // (0.1) Cuts on Tag Muon and z0 parameters
         if (m_mutrk){
             int index(0);
             std::vector<int> listToDelete;
@@ -618,24 +618,24 @@ namespace Analysis {
             myVxCandidate->clearTracks();
             myVxCandidate->setTrackParticleLinks( newLinkVector );
             }
-            
 
 
             return myVxCandidate;
         } else {
-            xAOD::Vertex* myVxCandidate = m_iVertexFitter->fit(inputTracks, vertex);
+            xAOD::Vertex *myVxCandidate = m_iVertexFitter->fit(inputTracks, vertex);
 
             // Added by ASC
-            if(myVxCandidate != 0){
-            std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
-            for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++)
-            { ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const) 
-            mylink.setStorableObject(*importedTrackCollection, true); 
-            mylink.index(); // Use index (should be faster) 
-            newLinkVector.push_back( mylink ); }
-            
-            myVxCandidate->clearTracks();
-            myVxCandidate->setTrackParticleLinks( newLinkVector );
+            if (myVxCandidate != 0) {
+                std::vector < ElementLink < DataVector < xAOD::TrackParticle > > > newLinkVector;
+                for (unsigned int i = 0; i < myVxCandidate->trackParticleLinks().size(); i++) {
+                    ElementLink <DataVector<xAOD::TrackParticle>> mylink = myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const)
+                    mylink.setStorableObject(*importedTrackCollection, true);
+                    mylink.index(); // Use index (should be faster)
+                    newLinkVector.push_back(mylink);
+                }
+
+                myVxCandidate->clearTracks();
+                myVxCandidate->setTrackParticleLinks(newLinkVector);
             }
 
 

@@ -8,6 +8,7 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "GoodRunsLists/GoodRunsListSelectionTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "MuonSelectorTools/MuonSelectionTool.h"
 
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -32,6 +33,15 @@ public:
 
     virtual StatusCode finalize();
 
+    //Checks if the Particles of type P and type Q lie in a cone of dR
+    template<typename P,typename Q>
+    double ParticleDR(P& a, Q& b){
+        double dEta = a.eta() - b.Eta();
+        double dPhi = TVector2::Phi_mpi_pi(a.phi() - b.Phi());
+
+        return sqrt(dEta*dEta + dPhi*dPhi);
+    }
+
 private:
     std::string m_jpsiContainerName; //!< Name of output container to store results
     double m_muonMass;
@@ -44,6 +54,7 @@ private:
     ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter;
     ToolHandle<IGoodRunsListSelectionTool>      m_grlTool;
     ToolHandle<Trig::TrigDecisionTool>          m_tdt;
+    ToolHandle<CP::IMuonSelectionTool>          m_muSel;
 
 
     void addBranches(void);
@@ -57,6 +68,7 @@ private:
     TVector3       origTrackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
     TLorentzVector origTrack4Momentum(const xAOD::Vertex * vxCandidate, int trkIndex, double mass) const;
     double         trackCharge(const xAOD::Vertex * vxCandidate, int i) const;
+    int            isMuonMatched(TLorentzVector& refTrk);
 
 //    double         invariantMassError(const xAOD::Vertex* vxCandidate, std::vector<double> masses) const;
 //    double         massErrorVKalVrt(const xAOD::Vertex * vxCandidate, std::vector<double> masses) const;
@@ -74,6 +86,7 @@ private:
     std::vector<double> * m_jpsiMassPullRec;
     std::vector<double> * m_jpsiMassPullMC;
     std::vector<double> * m_jpsiChi2;
+    std::vector<int> * m_jpsiMatched;
 
     std::vector<double> * m_trkRefitPx1;
     std::vector<double> * m_trkRefitPy1;

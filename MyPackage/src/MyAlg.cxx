@@ -18,7 +18,8 @@ MyAlg::MyAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthAlgorithm(n
                                                                   m_v0Tools("Trk::V0Tools"),
                                                                   m_pvRefitter("Analysis::PrimaryVertexRefitter"),
                                                                   m_grlTool("GoodRunsListSelectionTool/Whatever"),
-                                                                  m_tdt("Trig::TrigDecisionTool/TrigDecisionTool")
+                                                                  m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
+                                                                  m_muSel("CP::MuonSelectionTool/MuonSelectionTool")
 
 {
     declareProperty("JpsiFinder", m_jpsiFinder, "The private JpsiFinder tool");
@@ -40,6 +41,7 @@ StatusCode MyAlg::initialize() {
     CHECK( m_pvRefitter.retrieve());
     CHECK( m_grlTool.retrieve());
     CHECK( m_tdt.retrieve());
+    CHECK( m_muSel.retrieve());
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
     CHECK( histSvc.retrieve() );
@@ -109,6 +111,8 @@ StatusCode MyAlg::execute() {
     }
 
     clearBranches();
+
+
 
     // Jpsi container and its auxilliary store
     xAOD::VertexContainer*    jpsiContainer = NULL;
@@ -245,6 +249,7 @@ void MyAlg::addBranches() {
     tree->Branch("jpsiMassPullRec", &m_jpsiMassPullRec);
     tree->Branch("jpsiMassPullMC", &m_jpsiMassPullMC);
     tree->Branch("jpsiChi2", &m_jpsiChi2);
+    tree->Branch("jpsiMatched", &m_jpsiMatched);
 
     tree->Branch("trkRefitPx1",  &m_trkRefitPx1);
     tree->Branch("trkRefitPy1", &m_trkRefitPy1);
@@ -280,6 +285,7 @@ void MyAlg::initializeBranches() {
     m_jpsiMassPullRec = new std::vector<double>;
     m_jpsiMassPullMC = new std::vector<double>;
     m_jpsiChi2 = new std::vector<double>;
+    m_jpsiMatched = new std::vector<int>;
 
     m_trkRefitPx1 = new std::vector<double>;
     m_trkRefitPy1 = new std::vector<double>;
@@ -317,6 +323,7 @@ void MyAlg::clearBranches() {
     m_jpsiMassPullRec->clear();
     m_jpsiMassPullMC->clear();
     m_jpsiChi2->clear();
+    m_jpsiMatched->clear();
 
     m_trkRefitPx1->clear();
     m_trkRefitPy1->clear();
@@ -343,6 +350,17 @@ void MyAlg::clearBranches() {
     m_trkOrigPz2->clear();
     m_trkOrigPt2->clear();
 
+}
+
+
+int MyAlg::isMuonMatched(TLorentzVector& refTrk) {
+    const xAOD::MuonContainer* muons = 0;
+    CHECK( evtStore()->retrieve(muons,"CalibratedMuons") );
+    for (const auto& muon : *muons){
+        if (m_muSel->getQuality(*muon) <= xAOD::Muon::Medium && ParticleDR(*muon, refTrk) < 0.005)
+            return 1;
+    }
+    return 0;
 }
 
 // ---------------------------------------------------------------------------------
