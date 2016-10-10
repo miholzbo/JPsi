@@ -80,31 +80,31 @@ ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFind
 ToolSvc += ExampleJpsiFinder
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_13TeV.periodAllYear_DetStatus-v80-pro20-08_DQDefects-00-02-02_PHYS_StandardGRL_All_Good_25ns_TriggerMenu1e34only.xml"])
 
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_mumu
-BPHY1_Reco_mumu = DerivationFramework__Reco_mumu(
-    name                   = "BPHY1_Reco_mumu",
-    JpsiFinder             = ToolSvc.JpsiFinderName,
-    OutputVtxContainerName = "BPHY1OniaCandidates",
-    PVContainerName        = "PrimaryVertices",
-    RefPVContainerName     = "BPHY1RefittedPrimaryVertices",
-    RefitPV                = True,
-    MaxPVrefit             = 100000,
-    DoVertexType           = 7)
-
-ToolSvc += BPHY1_Reco_mumu
-
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Select_onia2mumu
-BPHY1_Select_Jpsi2mumu = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY1_Select_Jpsi2mumu",
-    HypothesisName        = "Jpsi",
-    InputVtxContainerName = "BPHY1OniaCandidates",
-    VtxMassHypo           = 3096.916,
-    MassMin               = 2000.0,
-    MassMax               = 3600.0,
-    Chi2Max               = 200,
-    DoVertexType          = 7)
-
-ToolSvc += BPHY1_Select_Jpsi2mumu
+# from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_mumu
+# BPHY1_Reco_mumu = DerivationFramework__Reco_mumu(
+#     name                   = "BPHY1_Reco_mumu",
+#     JpsiFinder             = ToolSvc.JpsiFinderName,
+#     OutputVtxContainerName = "BPHY1OniaCandidates",
+#     PVContainerName        = "PrimaryVertices",
+#     RefPVContainerName     = "BPHY1RefittedPrimaryVertices",
+#     RefitPV                = True,
+#     MaxPVrefit             = 100000,
+#     DoVertexType           = 7)
+#
+# ToolSvc += BPHY1_Reco_mumu
+#
+# from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Select_onia2mumu
+# BPHY1_Select_Jpsi2mumu = DerivationFramework__Select_onia2mumu(
+#     name                  = "BPHY1_Select_Jpsi2mumu",
+#     HypothesisName        = "Jpsi",
+#     InputVtxContainerName = "BPHY1OniaCandidates",
+#     VtxMassHypo           = 3096.916,
+#     MassMin               = 2000.0,
+#     MassMax               = 3600.0,
+#     Chi2Max               = 200,
+#     DoVertexType          = 7)
+#
+# ToolSvc += BPHY1_Select_Jpsi2mumu
 
 
 

@@ -53,6 +53,8 @@ StatusCode MyAlg::initialize() {
 
     eventCntr = 0;
     uncleanCntr = 0;
+    m_muonMass = 105.658;
+    m_trkMasses = std::vector<double>(2, 105.658);
 
     initializeBranches();
     addBranches();
@@ -107,7 +109,7 @@ StatusCode MyAlg::execute() {
             ++uncleanCntr;
             return StatusCode::SUCCESS;
         }
-        if (!hasPV()){
+        if (!hasPV()) {
             ++uncleanCntr;
             return StatusCode::SUCCESS;
         }
@@ -118,12 +120,12 @@ StatusCode MyAlg::execute() {
 
 
     // Jpsi container and its auxilliary store
-    xAOD::VertexContainer*    jpsiContainer = NULL;
-    xAOD::VertexAuxContainer* jpsiAuxContainer = NULL;
+    xAOD::VertexContainer *jpsiContainer = NULL;
+    xAOD::VertexAuxContainer *jpsiAuxContainer = NULL;
 
     // call Jpsi finder
     ATH_MSG_DEBUG("Calling JpsiFinder ...");
-    if( !m_jpsiFinder->performSearch(jpsiContainer, jpsiAuxContainer).isSuccess() ) {
+    if (!m_jpsiFinder->performSearch(jpsiContainer, jpsiAuxContainer).isSuccess()) {
         ATH_MSG_FATAL("Jpsi finder (" << m_jpsiFinder << ") failed.");
         return StatusCode::FAILURE;
     }
@@ -134,8 +136,9 @@ StatusCode MyAlg::execute() {
     jpsiCand = jpsiContainer->size();
     ATH_MSG_INFO("Number of Jpsi Candidates:" << jpsiContainer->size());
 
-    for ( xAOD::VertexContainer::const_iterator vxcItr = jpsiContainer->begin() ; vxcItr != jpsiContainer->end() ; vxcItr++ ) {
-        const xAOD::Vertex* jpsiCandidate = (*vxcItr);
+    for (xAOD::VertexContainer::const_iterator vxcItr = jpsiContainer->begin();
+         vxcItr != jpsiContainer->end(); vxcItr++) {
+        const xAOD::Vertex *jpsiCandidate = (*vxcItr);
         //ATH_MSG_INFO("Cov. matrix " << jpsiCandidate->covariance().size());
 
         // refitted track parameters
@@ -171,8 +174,8 @@ StatusCode MyAlg::execute() {
         m_trkOrigPt2->push_back(origTrk2.Pt());
 
         // Calculate the invariant masses and their errors
-        double orig_mass = (origTrk1+origTrk2).M();                      // mass from original tracks
-        double mass      = (refTrk1+refTrk2).M();                        // mass from refitted tracks
+        double orig_mass = (origTrk1 + origTrk2).M();                      // mass from original tracks
+        double mass = (refTrk1 + refTrk2).M();                        // mass from refitted tracks
 //        double error     = invariantMassError(jpsiCandidate, std::vector<double>(2, m_muonMass));  // invariant mass error
 
         m_jpsiMass->push_back(mass);
@@ -186,44 +189,54 @@ StatusCode MyAlg::execute() {
     }
 
     // retrieve decorated JpsiCandidates
-    const xAOD::VertexContainer* decJpsiCandidates = NULL;
-    CHECK( evtStore()->retrieve(decJpsiCandidates, "BPHY1OniaCandidates") );
+    const xAOD::VertexContainer *decJpsiCandidates = NULL;
+    CHECK(evtStore()->retrieve(decJpsiCandidates, "BPHY1OniaCandidates"));
     ATH_MSG_DEBUG("Number of decorated JpsiCandidates: " << decJpsiCandidates->size());
 
     // access quantities calculated in BPhysCode
-    for (const xAOD::Vertex* cand : *decJpsiCandidates){
+    for (const xAOD::Vertex *cand : *decJpsiCandidates) {
         xAOD::BPhysHypoHelper helper = xAOD::BPhysHypoHelper("Jpsi", cand);
-        ATH_MSG_DEBUG("lxy: " << helper.lxy());
-        m_jpsiLxy->push_back(helper.lxy());
-        ATH_MSG_DEBUG("tau: " << helper.tau());
-        m_jpsiTau->push_back(helper.tau());
+
     }
 
     // retrieve primary vertices
-//    const xAOD::VertexContainer*    pvContainer = NULL;
-//    CHECK( evtStore()->retrieve(pvContainer, "PrimaryVertices") );
+    const xAOD::VertexContainer *pvContainer = NULL;
+    CHECK(evtStore()->retrieve(pvContainer, "PrimaryVertices"));
 
 
     // create container for refitted primary vertices
-//    xAOD::VertexContainer*    refPvContainer = new xAOD::VertexContainer;
-//    xAOD::VertexAuxContainer* refPvAuxContainer = new xAOD::VertexAuxContainer;
-//    refPvContainer->setStore(refPvAuxContainer);
+    xAOD::VertexContainer *refPvContainer = new xAOD::VertexContainer;
+    xAOD::VertexAuxContainer *refPvAuxContainer = new xAOD::VertexAuxContainer;
+    refPvContainer->setStore(refPvAuxContainer);
 
-    // loop over all Primary Vertices
-//    int i = 0;
-//    for (auto pv : *pvContainer){
-//        if (pv->vertexType() == xAOD::VxType::PriVtx || pv->vertexType() == xAOD::VxType::PileUp) {
-//            i++;
-//            ATH_MSG_INFO("Original PV: (" << pv->x() << "," << pv->y() << "," << pv->z() << ")");
-//            for (auto jpsi : *jpsiContainer) {
-//                const xAOD::Vertex *refPV = m_pvRefitter->refitVertex(pv, jpsi, false);
-//                if (refPV) {
-//                    ATH_MSG_INFO("refitted PV: (" << refPV->x() << "," << refPV->y() << "," << refPV->z() << ")");
-//                }
-//            }
-//        }
-//    }
-//    ATH_MSG_INFO("Number of PVs: " << pvContainer->size() << " Number of good PVs: " << i);
+    // loop over all good Primary Vertices
+    std::vector<const xAOD::Vertex *> goodPVs = GetGoodPVs(pvContainer);
+    ATH_MSG_DEBUG("Number of PVs: " << pvContainer->size() << " Number of good PVs: " << goodPVs.size());
+    for (auto jpsi : *jpsiContainer) {
+        std::vector<const xAOD::Vertex*> refPVs;
+        for (auto pv : goodPVs) {
+            ATH_MSG_DEBUG("Original PV: (" << pv->x() << "," << pv->y() << "," << pv->z() << ")");
+            const xAOD::Vertex *refPV = m_pvRefitter->refitVertex(pv, jpsi, false);
+            if (refPV) {
+                ATH_MSG_DEBUG("refitted PV: (" << refPV->x() << "," << refPV->y() << "," << refPV->z() << ")");
+                refPVs.push_back(refPV);
+            }
+            else{
+                refPVs.push_back(pv);
+            }
+        }
+        // return highest pT vertex
+        size_t index = FindHighPtIndex(refPVs);
+
+        // calculate lxy and tau
+        auto lxy = m_v0Tools->lxy(jpsi, refPVs[index]);
+        auto tau = m_v0Tools->tau(jpsi, refPVs[index], m_trkMasses);
+        ATH_MSG_DEBUG("lxy: " << lxy);
+        m_jpsiLxy->push_back(lxy);
+        ATH_MSG_DEBUG("tau: " << tau);
+        m_jpsiTau->push_back(tau);
+    }
+
 
     // save in the StoreGate
     ATH_MSG_DEBUG("Recording to StoreGate: " << m_jpsiContainerName << " size:" <<jpsiContainer->size());
@@ -241,6 +254,16 @@ StatusCode MyAlg::execute() {
 }
 
 
+
+size_t MyAlg::FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist) {
+    // it SHOULD be the first one in the collection but it shouldn't take long to do a quick check
+    for(size_t i =0; i<PVlist.size(); i++) {
+        if(PVlist[i]->vertexType() == xAOD::VxType::PriVtx) return i;
+    }
+    std::cout << "FATAL ERROR High Pt Primary vertex not found - this should not happen\n";
+    return std::numeric_limits<std::size_t>::max(); //This should not happen
+}
+
 bool MyAlg::hasPV() {
 
     const xAOD::VertexContainer *vertices(0);
@@ -255,6 +278,25 @@ bool MyAlg::hasPV() {
         ATH_MSG_WARNING("Failed to retrieve VertexContainer \"PrimaryVertices\", returning NULL");
     }
     return NULL;
+}
+
+std::vector<const xAOD::Vertex*> MyAlg::GetGoodPVs(const xAOD::VertexContainer* pvContainer){
+    typedef xAOD::VxType::VertexType VertexType;
+    VertexType Pvtx = xAOD::VxType::PriVtx;
+    VertexType Pileupvtx = xAOD::VxType::PileUp;
+    std::vector<const xAOD::Vertex*> goodPrimaryVertices;
+    goodPrimaryVertices.reserve(pvContainer->size());
+
+    for(auto ptr = pvContainer->begin(); ptr!= pvContainer->end(); ++ptr) {
+        VertexType thistype = (*ptr)->vertexType();
+        if(thistype == Pileupvtx || thistype == Pvtx)
+            goodPrimaryVertices.push_back(*ptr);
+        else {
+//             cout << "vertex type  " << thistype << endl;
+        }
+    }
+    return goodPrimaryVertices;
+
 }
 
 void MyAlg::addBranches() {

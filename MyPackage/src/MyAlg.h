@@ -46,6 +46,7 @@ public:
 private:
     std::string m_jpsiContainerName; //!< Name of output container to store results
     double m_muonMass;
+    std::vector<double> m_trkMasses;
 
 
     TTree* tree;
@@ -64,6 +65,8 @@ private:
     void clearBranches(void);
 
     bool hasPV();
+    std::vector<const xAOD::Vertex*> GetGoodPVs(const xAOD::VertexContainer* pvContainer);
+    size_t FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist);
 
     TVector3       trackMomentum(const xAOD::Vertex * vxCandidate, uint trkIndex) const;
     TLorentzVector track4Momentum(const xAOD::Vertex * vxCandidate, int trkIndex, double mass) const;
