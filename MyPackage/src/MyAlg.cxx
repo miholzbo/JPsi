@@ -8,6 +8,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "xAODMuon/MuonContainer.h"
+#include "xAODBPhys/BPhysHypoHelper.h"
 
 #include <stdio.h>
 
@@ -19,7 +20,8 @@ MyAlg::MyAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthAlgorithm(n
                                                                   m_pvRefitter("Analysis::PrimaryVertexRefitter"),
                                                                   m_grlTool("GoodRunsListSelectionTool/Whatever"),
                                                                   m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
-                                                                  m_muSel("CP::MuonSelectionTool/MuonSelectionTool")
+                                                                  m_muSel("CP::MuonSelectionTool/MuonSelectionTool"),
+                                                                  m_muCalib("CP::MuonCalibrationAndSmearingTool/MuonCalibrationAndSmearingTool")
 
 {
     declareProperty("JpsiFinder", m_jpsiFinder, "The private JpsiFinder tool");
@@ -42,6 +44,7 @@ StatusCode MyAlg::initialize() {
     CHECK( m_grlTool.retrieve());
     CHECK( m_tdt.retrieve());
     CHECK( m_muSel.retrieve());
+    CHECK( m_muCalib.retrieve());
 
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
     CHECK( histSvc.retrieve() );
@@ -175,12 +178,26 @@ StatusCode MyAlg::execute() {
         m_jpsiMass->push_back(mass);
 //        m_jpsiMassError->push_back(error);
         m_jpsiChi2->push_back(jpsiCandidate->chiSquared());
+        m_jpsiMatched->push_back(isMuonMatched(refTrk2));
         m_jpsiMassRec->push_back(orig_mass);
 //        m_jpsiMassPullRec->push_back((mass-orig_mass)/error);
 //        m_jpsiMassPullMC->push_back((mass-3096.88)/error);
 
     }
 
+    // retrieve decorated JpsiCandidates
+    const xAOD::VertexContainer* decJpsiCandidates = NULL;
+    CHECK( evtStore()->retrieve(decJpsiCandidates, "BPHY1OniaCandidates") );
+    ATH_MSG_DEBUG("Number of decorated JpsiCandidates: " << decJpsiCandidates->size());
+
+    // access quantities calculated in BPhysCode
+    for (const xAOD::Vertex* cand : *decJpsiCandidates){
+        xAOD::BPhysHypoHelper helper = xAOD::BPhysHypoHelper("Jpsi", cand);
+        ATH_MSG_DEBUG("lxy: " << helper.lxy());
+        m_jpsiLxy->push_back(helper.lxy());
+        ATH_MSG_DEBUG("tau: " << helper.tau());
+        m_jpsiTau->push_back(helper.tau());
+    }
 
     // retrieve primary vertices
 //    const xAOD::VertexContainer*    pvContainer = NULL;
@@ -250,6 +267,8 @@ void MyAlg::addBranches() {
     tree->Branch("jpsiMassPullMC", &m_jpsiMassPullMC);
     tree->Branch("jpsiChi2", &m_jpsiChi2);
     tree->Branch("jpsiMatched", &m_jpsiMatched);
+    tree->Branch("jpsiLxy", &m_jpsiLxy);
+    tree->Branch("jpsiTau", &m_jpsiTau);
 
     tree->Branch("trkRefitPx1",  &m_trkRefitPx1);
     tree->Branch("trkRefitPy1", &m_trkRefitPy1);
@@ -286,6 +305,8 @@ void MyAlg::initializeBranches() {
     m_jpsiMassPullMC = new std::vector<double>;
     m_jpsiChi2 = new std::vector<double>;
     m_jpsiMatched = new std::vector<int>;
+    m_jpsiLxy = new std::vector<double>;
+    m_jpsiTau = new std::vector<double>;
 
     m_trkRefitPx1 = new std::vector<double>;
     m_trkRefitPy1 = new std::vector<double>;
@@ -324,6 +345,8 @@ void MyAlg::clearBranches() {
     m_jpsiMassPullMC->clear();
     m_jpsiChi2->clear();
     m_jpsiMatched->clear();
+    m_jpsiLxy->clear();
+    m_jpsiTau->clear();
 
     m_trkRefitPx1->clear();
     m_trkRefitPy1->clear();
@@ -355,9 +378,14 @@ void MyAlg::clearBranches() {
 
 int MyAlg::isMuonMatched(TLorentzVector& refTrk) {
     const xAOD::MuonContainer* muons = 0;
-    CHECK( evtStore()->retrieve(muons,"CalibratedMuons") );
+    CHECK( evtStore()->retrieve(muons,"Muons") );
     for (const auto& muon : *muons){
-        if (m_muSel->getQuality(*muon) <= xAOD::Muon::Medium && ParticleDR(*muon, refTrk) < 0.005)
+        xAOD::Muon* mu = 0;
+        if( m_muCalib->correctedCopy( *muon, mu ) == CP::CorrectionCode::Error  ) {
+            ATH_MSG_WARNING( "Failed to correct the muon!" );
+            continue;
+        }
+        if (m_muSel->getQuality(*mu) <= xAOD::Muon::Medium && ParticleDR(*muon, refTrk) < 0.005)
             return 1;
     }
     return 0;

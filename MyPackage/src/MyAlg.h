@@ -9,6 +9,7 @@
 #include "GoodRunsLists/GoodRunsListSelectionTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "MuonSelectorTools/MuonSelectionTool.h"
+#include "MuonMomentumCorrections/MuonCalibrationAndSmearingTool.h"
 
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -55,6 +56,7 @@ private:
     ToolHandle<IGoodRunsListSelectionTool>      m_grlTool;
     ToolHandle<Trig::TrigDecisionTool>          m_tdt;
     ToolHandle<CP::IMuonSelectionTool>          m_muSel;
+    ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_muCalib;
 
 
     void addBranches(void);
@@ -87,6 +89,8 @@ private:
     std::vector<double> * m_jpsiMassPullMC;
     std::vector<double> * m_jpsiChi2;
     std::vector<int> * m_jpsiMatched;
+    std::vector<double> * m_jpsiLxy;
+    std::vector<double> * m_jpsiTau;
 
     std::vector<double> * m_trkRefitPx1;
     std::vector<double> * m_trkRefitPy1;

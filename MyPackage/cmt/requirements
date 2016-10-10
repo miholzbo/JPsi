@@ -18,6 +18,8 @@ use GoodRunsLists GoodRunsLists-* DataQuality
 use TrigDecisionTool TrigDecisionTool-* Trigger/TrigAnalysis
 use AtlasROOT AtlasROOT-* External
 use MuonSelectorTools MuonSelectorTools-* PhysicsAnalysis/MuonID
+use MuonMomentumCorrections MuonMomentumCorrections-* PhysicsAnalysis/MuonID/MuonIDAnalysis
+use xAODBPhys                    xAODBPhys-*                    Event/xAOD
 end_private
 
 ## put here your package dependencies...

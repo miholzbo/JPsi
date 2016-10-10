@@ -1,11 +1,18 @@
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 
+
+
+import socket
+hostname = socket.gethostname()
 # InputFiles for local use
-#athenaCommonFlags.FilesInput = [ "/project/etp5/miholzbo/mc15/mc15_13TeV.424100.Pythia8B_A14_CTEQ6L1_Jpsimu4mu4.merge.AOD.e3735_s2608_s2183_r7772_r7676/AOD.08439866._000181.pool.root.1"]
-# athenaCommonFlags.FilesInput = ["/project/etp5/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
+if 'gar-ws-etp' in hostname:
+    athenaCommonFlags.FilesInput = [ "/project/etp5/miholzbo/mc15/mc15_13TeV.424100.Pythia8B_A14_CTEQ6L1_Jpsimu4mu4.merge.AOD.e3735_s2608_s2183_r7772_r7676/AOD.08439866._000181.pool.root.1"]
+    # athenaCommonFlags.FilesInput = ["/project/etp5/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
+
 # InputFiles for use on lxplus
-# athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
-athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/mc15/AOD.08439866._000181.pool.root.1"]
+if 'lxplus' in hostname:
+    athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/mc15/AOD.08439866._000181.pool.root.1"]
+    # athenaCommonFlags.FilesInput = [ "/afs/cern.ch/user/m/miholzbo/data16/data16_13TeV.00303304.physics_Main.merge.AOD.f716_m1620._lb1250._0004.1"]
 
 from RecExConfig.RecFlags import rec
 from RecExConfig.RecAlgsFlags import recAlgs
@@ -73,11 +80,40 @@ ExampleJpsiFinder = Analysis__JpsiFinder(name                        = "JpsiFind
 ToolSvc += ExampleJpsiFinder
 ToolSvc += CfgMgr.GoodRunsListSelectionTool("GRLTool",GoodRunsListVec=["data16_13TeV.periodAllYear_DetStatus-v80-pro20-08_DQDefects-00-02-02_PHYS_StandardGRL_All_Good_25ns_TriggerMenu1e34only.xml"])
 
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_mumu
+BPHY1_Reco_mumu = DerivationFramework__Reco_mumu(
+    name                   = "BPHY1_Reco_mumu",
+    JpsiFinder             = ToolSvc.JpsiFinderName,
+    OutputVtxContainerName = "BPHY1OniaCandidates",
+    PVContainerName        = "PrimaryVertices",
+    RefPVContainerName     = "BPHY1RefittedPrimaryVertices",
+    RefitPV                = True,
+    MaxPVrefit             = 100000,
+    DoVertexType           = 7)
+
+ToolSvc += BPHY1_Reco_mumu
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Select_onia2mumu
+BPHY1_Select_Jpsi2mumu = DerivationFramework__Select_onia2mumu(
+    name                  = "BPHY1_Select_Jpsi2mumu",
+    HypothesisName        = "Jpsi",
+    InputVtxContainerName = "BPHY1OniaCandidates",
+    VtxMassHypo           = 3096.916,
+    MassMin               = 2000.0,
+    MassMax               = 3600.0,
+    Chi2Max               = 200,
+    DoVertexType          = 7)
+
+ToolSvc += BPHY1_Select_Jpsi2mumu
+
+
+
 svcMgr += CfgMgr.THistSvc()
 svcMgr.THistSvc.Output += ["JPsiOutput DATAFILE='JPsiOutput.root' OPT='RECREATE'"]
 
 
 algSeq = CfgMgr.AthSequencer("AthAlgSeq")
+# algSeq += CfgMgr.CP__CalibratedMuonsProvider(Input="Muons",Output="CalibratedMuons")
 algSeq += CfgMgr.MyAlg()
 algSeq.MyAlg.JpsiFinder = ToolSvc.JpsiFinderName
 algSeq.MyAlg.GRLTool = ToolSvc.GRLTool
@@ -103,7 +139,7 @@ chronoStatSvc.ChronoPrintOutTable = FALSE
 chronoStatSvc.PrintUserTime       = FALSE
 chronoStatSvc.StatPrintOutTable   = FALSE
 
-theApp.EvtMax = 100 # number of event to process
+theApp.EvtMax = -1 # number of event to process
 
 # Stops writing of monitoring ntuples (big files)
 from PerfMonComps.PerfMonFlags import jobproperties as jp
